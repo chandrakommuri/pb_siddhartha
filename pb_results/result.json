@@ -1,0 +1,20 @@
+{
+	"rollno":"051425",
+	"name":"Chandra Sekhar Kommuri",
+	"section":"B.Sc-MPE",
+	"second_language":"Telugu",
+	"parent_gaurdian":"K V L Kanta Rao",
+	"sementers":[{
+				"sem_number":"1",
+				"ccode":"ENG123",
+				"title":"English-1",
+				"type":"Theory",
+				"internal":"10",
+				"external":"40",
+				"total":"50",
+				"grade_points":"5",
+				"credits":"4",
+				"credit_points":"12",
+				"grade":""
+			}]
+}

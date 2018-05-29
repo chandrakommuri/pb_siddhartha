@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>P.B.Siddhartha Results Portal</title>
+	<link rel="icon" type="image/png" href="../images/buddha.png" />
+	<script type="text/javascript" src="../js/jquery.min.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function(){
+			$('#get-result').click(function() {
+				$('#result').fadeOut("slow");
+				var rollno = $('#q_rollno').val();
+				if(!rollno) {
+					$(this).closest('table').append($('<tr />').append($('<td />').attr('colspan', 3).text('Invalid roll number.')).addClass('error'));
+					return;
+				} else {
+					$('tr.error').remove();
+				}
+				$.get( "get_result.php", {rollno:rollno}, function( result ) {
+						$('#rollno').text(result.rollno);
+						$('#name').text(result.name);
+						$('#section').text(result.section);
+						$('#parent_gaurdian').text(result.parent_gaurdian);
+						$('#second_language').text(result.second_language);
+						var $semesters = $('#semesters');
+						$.each(result.semesters, function(si, semester){
+							var $div = $('<div/>');
+							var $table = $('<table/>').attr('border','1').attr('bordercolor','#cdcdcd');
+							var $thr = $('<tr/>');
+							var $th = $('<th/>')
+										.attr('colspan','9')
+										.addClass('center')
+										.append('Semester - ')
+										.append(semester.number);
+							
+							var $ttr = $('<tr/>');
+							$ttr.append($('<th/>').append('Course Code').addClass('center'));
+							$ttr.append($('<th/>').append('Title').addClass('center'));
+							$ttr.append($('<th/>').append('Type').addClass('center'));
+							$ttr.append($('<th/>').append('Internal').addClass('center'));
+							$ttr.append($('<th/>').append('External').addClass('center'));
+							$ttr.append($('<th/>').append('Total').addClass('center'));
+							$ttr.append($('<th/>').append('Grade Points').addClass('center'));
+							$ttr.append($('<th/>').append('Credits').addClass('center'));
+							$ttr.append($('<th/>').append('Credit Points').addClass('center'));
+
+							$div.append($table.append($thr.append($th)).append($ttr));
+
+							$.each(semester.courses, function(ci,course){
+								var $tr = $('<tr/>');
+								$tr.append($('<td/>').append(course.course_code).addClass('center'));
+								$tr.append($('<td/>').append(course.title));
+								$tr.append($('<td/>').append(course.type).addClass('center'));
+								$tr.append($('<td/>').append(course.internal).addClass('center'));
+								$tr.append($('<td/>').append(course.external).addClass('center'));
+								$tr.append($('<td/>').append(course.total).addClass('center'));
+								$tr.append($('<td/>').append(course.grade_points).addClass('center'));
+								$tr.append($('<td/>').append(course.credits).addClass('center'));
+								$tr.append($('<td/>').append(course.credit_points).addClass('center'));
+								$table.append($tr);
+							});
+
+							if(si % 2 == 0) {
+								$div.addClass('left');
+								$semesters.append($div);
+							} else {
+								$div.addClass('right');
+								$semesters.append($div);
+								$semesters.append($('<div/>').addClass('clear'));
+							}
+						});
+
+						if(result.semesters.length % 2 != 0) {
+							$semesters.append($('<div/>').addClass('clear'));
+						}
+
+						$('#result').fadeIn("slow");
+					},
+				"json");
+			});
+		});
+	</script>
+	<style>
+		* {
+			margin: 0px;
+			padding: 0px;
+		}
+
+		.center {
+			text-align: center;
+		}
+
+		.form_label {
+			font-size: 15px;
+		}
+
+		.form_input {
+			padding: 3px 5px;
+			border: 1px solid #cdcdcd;
+			border-radius: 5px;
+		}
+
+		.button {
+			background-color: #279DE3;
+			padding: 5px 15px;
+			color: #FFFFFF !important;
+			border: 0;
+			margin: 0;
+			font-weight: bold;
+			font-size: 11px;
+			text-decoration: none;
+			border-radius: 5px;
+		}
+
+		div.left {
+			float: left;
+		}
+
+		div.right {
+			float: right;
+		}
+
+		div.clear {
+			clear: both;
+		}
+
+		#wrapper {
+			font: 12px arial, sans-serif;
+		}
+
+		#query-form table {
+			margin: 10px auto;
+		}
+
+		#query-form td {
+			padding: 5px;
+		}
+
+		#result {
+			margin: 0px auto;
+			width: 1180px;
+			display: none;
+		}
+
+		#banner {
+			background: #cdcdcd url('../images/pb_logo.png') no-repeat;
+			background-size: 130px 150px;
+			background-position: 3% 50%;
+			margin: 0px auto;
+			height: 150px;
+			padding: 10px;
+		}
+	
+		#collage {
+			margin-top: 50px;
+			margin-left: 75px;
+			text-align: center;
+		}
+
+		#collage h1 {
+			margin-bottom: 10px;
+		}
+
+		#content label {
+			font-weight: bold;
+			text-transform: capitalize;
+		}
+
+		#basic-info {
+			padding: 10px;
+			border: 1px solid #cdcdcd;
+		}
+
+		#semesters {
+			padding: 0px 5px;
+			border: 1px solid #cdcdcd;
+			border-top: none;
+		}
+
+		#semesters table {
+			width: 575px;
+			border-color:#cdcdcd;
+			border-collapse: collapse;
+			margin: 5px 0px;
+		}
+
+		#semesters td, th {
+			padding: 5px;
+		}
+
+	</style>
+</head>
+<body>
+	<div id="wrapper">
+		<div id="query-form">
+			<table>
+				<tr>
+					<th><label for"q_rollno" class="form_label">Roll Number:</label></th>
+					<td><input type="text" name="rollno" id="q_rollno" class="form_input"></td>
+					<td><button id="get-result" class="button">Get Result</button></td>
+				</tr>
+			</table>
+		</div>
+		<div id="result">
+			<div id="banner">
+				<div id="collage">
+					<h1>P.B.Siddhartha College of Arts & Science, Vijayawada - 520010.</h1>
+					<h2>An Autonomous College in the jurisdiction of Krishna University</h2>
+				</div>
+			</div>
+			<div id="content">
+				<div id="basic-info">
+					<p class="center"><label>(Provisional Result)</label></p>
+					<p class="center"><label>Roll Number: </label><span id="rollno"></span></p>
+					<div class="left">
+						<label>Name: </label><span id="name"></span>
+						<br />
+						<label>Parent/Gaurdian's Name: </label><span id="parent_gaurdian"></span>
+					</div>
+					<div class="right">
+						<label>Section: </label><span id="section"></span>
+						<br />
+						<label>Second Language: </label><span id="second_language"></span>
+					</div>
+					<div class="clear"></div>
+				</div>
+				<div id="semesters"></div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>
