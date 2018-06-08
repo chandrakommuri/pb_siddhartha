@@ -1,8 +1,8 @@
 <?php 
-    class Semester implements JsonSerializable
+    class Part implements JsonSerializable
 	{
 		public $number;
-		public $parts;
+		public $courses;
 
 		public function __construct($number)
 		{

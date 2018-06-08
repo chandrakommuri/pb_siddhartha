@@ -5,6 +5,7 @@
         public $course_code;
         public $title;
         public $type;
+        public $part;
         public $internal;
         public $external;
         public $total;

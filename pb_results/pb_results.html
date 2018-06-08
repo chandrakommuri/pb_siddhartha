@@ -9,20 +9,24 @@
 			$('#get-result').click(function() {
 				$('#result').fadeOut("slow");
 				var rollno = $('#q_rollno').val();
+				$('tr.error').remove();
 				if(!rollno) {
-					$(this).closest('table').append($('<tr />').append($('<td />').attr('colspan', 3).text('Invalid roll number.')).addClass('error'));
+					$(this).closest('table').append($('<tr />').append($('<td />').attr('colspan', 3).text('Invalid roll number.').addClass('center')).addClass('error'));
 					return;
-				} else {
-					$('tr.error').remove();
 				}
+
 				$.get( "get_result.php", {rollno:rollno}, function( result ) {
+						if($.isEmptyObject(result)) {
+							$('#get-result').closest('table').append($('<tr />').append($('<td />').attr('colspan', 3).text('Invalid roll number.').addClass('center')).addClass('error'));
+							return;
+						}
 						$('#rollno').text(result.rollno);
 						$('#name').text(result.name);
 						$('#section').text(result.section);
 						$('#parent_gaurdian').text(result.parent_gaurdian);
 						$('#second_language').text(result.second_language);
-						var $semesters = $('#semesters');
-						$.each(result.semesters, function(si, semester){
+						var $semesters = $('#semesters').html('');
+						$.each(result.semesters, function(si, semester) {
 							var $div = $('<div/>');
 							var $table = $('<table/>').attr('border','1').attr('bordercolor','#cdcdcd');
 							var $thr = $('<tr/>');
@@ -44,19 +48,36 @@
 							$ttr.append($('<th/>').append('Credit Points').addClass('center'));
 
 							$div.append($table.append($thr.append($th)).append($ttr));
+							
+							$.each(semester.parts, function(pi,part) {
+								var $tpr = $('<tr/>');
+								var $tpd = $('<td/>')
+										.attr('colspan','9')
+										.addClass('center')
+										.append('Part - ')
+										.append(part.number);
+								$table.append($tpr.append($tpd));
 
-							$.each(semester.courses, function(ci,course){
-								var $tr = $('<tr/>');
-								$tr.append($('<td/>').append(course.course_code).addClass('center'));
-								$tr.append($('<td/>').append(course.title));
-								$tr.append($('<td/>').append(course.type).addClass('center'));
-								$tr.append($('<td/>').append(course.internal).addClass('center'));
-								$tr.append($('<td/>').append(course.external).addClass('center'));
-								$tr.append($('<td/>').append(course.total).addClass('center'));
-								$tr.append($('<td/>').append(course.grade_points).addClass('center'));
-								$tr.append($('<td/>').append(course.credits).addClass('center'));
-								$tr.append($('<td/>').append(course.credit_points).addClass('center'));
-								$table.append($tr);
+								$.each(part.courses, function(ci,course) {
+									var $tr = $('<tr/>');
+									$tr.append($('<td/>').append(course.course_code).addClass('center'));
+									$tr.append($('<td/>').append(course.title));
+									$tr.append($('<td/>').append(course.type).addClass('center'));
+									if(course.type == 'Diversified' || course.type == 'Extra Curricular') {
+										$tr.append($('<td/>').attr('colspan','4').append('-').addClass('center'));
+										$tr.append($('<td/>').append(course.credits).addClass('center'));
+										$tr.append($('<td/>').append('-').addClass('center'));
+									}
+									else {
+										$tr.append($('<td/>').append(course.internal).addClass('center'));
+										$tr.append($('<td/>').append(course.external).addClass('center'));
+										$tr.append($('<td/>').append(course.total).addClass('center'));
+										$tr.append($('<td/>').append(course.grade_points).addClass('center'));
+										$tr.append($('<td/>').append(course.credits).addClass('center'));
+										$tr.append($('<td/>').append(course.credit_points).addClass('center').addClass('credit_points'));
+									}
+									$table.append($tr);
+								});
 							});
 
 							if(si % 2 == 0) {
@@ -73,6 +94,13 @@
 							$semesters.append($('<div/>').addClass('clear'));
 						}
 
+						var $credit_points = $('.credit_points');
+						var count = $credit_points.length;
+						var sum = 0;
+						$credit_points.each(function(index, td){
+							sum += parseFloat($(td).text());
+						});
+						$('#statistics').html($('<label/>').text('Average credit points: ')).append((sum/count).toFixed(2));
 						$('#result').fadeIn("slow");
 					},
 				"json");
@@ -89,8 +117,20 @@
 			text-align: center;
 		}
 
+		.error {
+			color: #ff0000;	
+		}
+
+		.fail {
+			color: #ff0000;	
+		}
+
 		.form_label {
 			font-size: 15px;
+		}
+
+		.stat_label {
+			font-size: 13px;
 		}
 
 		.form_input {
@@ -177,7 +217,7 @@
 		}
 
 		#semesters table {
-			width: 575px;
+			width: 580px;
 			border-color:#cdcdcd;
 			border-collapse: collapse;
 			margin: 5px 0px;
@@ -185,6 +225,13 @@
 
 		#semesters td, th {
 			padding: 5px;
+		}
+
+		#statistics {
+			text-align: center;
+			padding: 10px;
+			border: 1px solid #cdcdcd;
+			border-top: none;
 		}
 
 	</style>
@@ -195,7 +242,7 @@
 			<table>
 				<tr>
 					<th><label for"q_rollno" class="form_label">Roll Number:</label></th>
-					<td><input type="text" name="rollno" id="q_rollno" class="form_input"></td>
+					<td><input type="number" name="rollno" id="q_rollno" class="form_input"></td>
 					<td><button id="get-result" class="button">Get Result</button></td>
 				</tr>
 			</table>
@@ -224,6 +271,7 @@
 					<div class="clear"></div>
 				</div>
 				<div id="semesters"></div>
+				<div id="statistics"></div>
 			</div>
 		</div>
 	</div>
