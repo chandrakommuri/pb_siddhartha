@@ -28,10 +28,10 @@
 						var $semesters = $('#semesters').html('');
 						$.each(result.semesters, function(si, semester) {
 							var $div = $('<div/>');
-							var $table = $('<table/>').attr('border','1').attr('bordercolor','#cdcdcd');
+							var $table = $('<table/>').attr('id', 'semester' + semester.number).attr('border','1').attr('bordercolor','#cdcdcd');
 							var $thr = $('<tr/>');
 							var $th = $('<th/>')
-										.attr('colspan','9')
+										.attr('colspan','11')
 										.addClass('center')
 										.append('Semester - ')
 										.append(semester.number);
@@ -40,9 +40,11 @@
 							$ttr.append($('<th/>').append('Course Code').addClass('center'));
 							$ttr.append($('<th/>').append('Title').addClass('center'));
 							$ttr.append($('<th/>').append('Type').addClass('center'));
+							$ttr.append($('<th/>').append('Month - Year').addClass('center'));
 							$ttr.append($('<th/>').append('Internal').addClass('center'));
 							$ttr.append($('<th/>').append('External').addClass('center'));
 							$ttr.append($('<th/>').append('Total').addClass('center'));
+							$ttr.append($('<th/>').append('Pass / Fail').addClass('center'));
 							$ttr.append($('<th/>').append('Grade Points').addClass('center'));
 							$ttr.append($('<th/>').append('Credits').addClass('center'));
 							$ttr.append($('<th/>').append('Credit Points').addClass('center'));
@@ -52,7 +54,7 @@
 							$.each(semester.parts, function(pi,part) {
 								var $tpr = $('<tr/>');
 								var $tpd = $('<td/>')
-										.attr('colspan','9')
+										.attr('colspan','11')
 										.addClass('center')
 										.append('Part - ')
 										.append(part.number);
@@ -61,24 +63,49 @@
 								$.each(part.courses, function(ci,course) {
 									var $tr = $('<tr/>');
 									$tr.append($('<td/>').append(course.course_code).addClass('center'));
-									$tr.append($('<td/>').append(course.title));
+									$tr.append($('<td/>').append(course.title).addClass('wrap'));
 									$tr.append($('<td/>').append(course.type).addClass('center'));
+									$tr.append($('<td/>').append(course.month_year).addClass('center'));
 									if(course.type == 'Diversified' || course.type == 'Extra Curricular') {
-										$tr.append($('<td/>').attr('colspan','4').append('-').addClass('center'));
+										$tr.append($('<td/>').attr('colspan','5').append('-').addClass('center'));
+										$tr.append($('<td/>').append(course.grade).addClass('center'));
 										$tr.append($('<td/>').append(course.credits).addClass('center'));
 										$tr.append($('<td/>').append('-').addClass('center'));
 									}
 									else {
-										$tr.append($('<td/>').append(course.internal).addClass('center'));
-										$tr.append($('<td/>').append(course.external).addClass('center'));
+										var $internal = $('<td/>').append(course.internal).addClass('center');
+										if(course.internal_pass == 'F') {
+											$internal.addClass('fail');
+										}
+										$tr.append($internal);
+										var $external = $('<td/>').append(course.external).addClass('center');
+										if(course.external_pass == 'F') {
+											$external.addClass('fail');
+										}
+										$tr.append($external);
 										$tr.append($('<td/>').append(course.total).addClass('center'));
+										var $pass = $('<td/>').append(course.pass).addClass('center');
+										if(course.pass == 'F') {
+											$pass.addClass('fail');
+										}
+										$tr.append($pass);
 										$tr.append($('<td/>').append(course.grade_points).addClass('center'));
 										$tr.append($('<td/>').append(course.credits).addClass('center'));
-										$tr.append($('<td/>').append(course.credit_points).addClass('center').addClass('credit_points'));
+										var $credit_points = $('<td/>').append(course.credit_points).addClass('center');
+										if(course.pass == 'P') {
+											$credit_points.addClass('part'+course.part+'_credit_points');
+										}
+										$tr.append($credit_points);
 									}
 									$table.append($tr);
 								});
 							});
+
+							if( $table.find('.fail').length > 0) {
+								$th.append($('<span />').append(' [FAIL]').addClass('fail'));
+							} else {
+								$th.append(' [PASS]');
+							}
 
 							if(si % 2 == 0) {
 								$div.addClass('left');
@@ -94,13 +121,48 @@
 							$semesters.append($('<div/>').addClass('clear'));
 						}
 
-						var $credit_points = $('.credit_points');
-						var count = $credit_points.length;
-						var sum = 0;
-						$credit_points.each(function(index, td){
-							sum += parseFloat($(td).text());
+						var $part1_credit_points = $('.part1_credit_points');
+						var count1 = $part1_credit_points.length;
+						var sum1 = 0;
+						$part1_credit_points.each(function(index, td){
+							sum1 += parseFloat($(td).text());
 						});
-						$('#statistics').html($('<label/>').text('Average credit points: ')).append((sum/count).toFixed(2));
+						var average1 = (sum1/count1).toFixed(2);
+
+						var $part2_credit_points = $('.part2_credit_points');
+						var count2 = $part2_credit_points.length;
+						var sum2 = 0;
+						$part2_credit_points.each(function(index, td){
+							sum2 += parseFloat($(td).text());
+						});
+						var average2 = (sum2/count2).toFixed(2);
+
+						var $part3_credit_points = $('.part3_credit_points');
+						var count3 = $part3_credit_points.length;
+						var sum3 = 0;
+						$part3_credit_points.each(function(index, td){
+							sum3 += parseFloat($(td).text());
+						});
+						var average3 = (sum3/count3).toFixed(2);
+						
+						var $credit_table = $('<table />').attr('border', '1').attr('bordercolor','#cdcdcd');;
+						var $thr = $('<tr />').append($('<th />').attr('rowspan',2).text('Average credit points'))
+											.append($('<th />').text('Part - 1'))
+											.append($('<th />').text('Part - 2'))
+											.append($('<th />').text('Part - 3'));
+						var $tr = $('<tr />').append($('<td />').text(average1))
+											.append($('<td />').text(average2))
+											.append($('<td />').text(average3));
+						$credit_table.append($thr).append($tr);
+						
+						var $status = $('<h2 />').append('Overall Status: ');
+						if($('#result').find('.fail').length > 0) {
+							$status.append($('<span />').append('FAIL').addClass('fail'));
+						} else {
+							$status.append('PASS');
+						}
+
+						$('#statistics').html($credit_table.append($thr).append($tr)).append($status);
 						$('#result').fadeIn("slow");
 					},
 				"json");
@@ -123,6 +185,7 @@
 
 		.fail {
 			color: #ff0000;	
+			font-weight: bold;
 		}
 
 		.form_label {
@@ -151,6 +214,19 @@
 			border-radius: 5px;
 		}
 
+		.wrap {
+			overflow-wrap: break-word;
+			word-wrap: break-word;
+
+			-ms-word-break: break-all;
+			word-break: break-word;
+
+			-ms-hyphens: auto;
+			-moz-hyphens: auto;
+			-webkit-hyphens: auto;
+			hyphens: auto;
+		}
+
 		div.left {
 			float: left;
 		}
@@ -177,7 +253,7 @@
 
 		#result {
 			margin: 0px auto;
-			width: 1180px;
+			width: 1300px;
 			display: none;
 		}
 
@@ -217,7 +293,7 @@
 		}
 
 		#semesters table {
-			width: 580px;
+			width: 640px;
 			border-color:#cdcdcd;
 			border-collapse: collapse;
 			margin: 5px 0px;
@@ -232,6 +308,17 @@
 			padding: 10px;
 			border: 1px solid #cdcdcd;
 			border-top: none;
+		}
+
+		#statistics table {
+			width: 700px;
+			border-color:#cdcdcd;
+			border-collapse: collapse;
+			margin: 5px auto;
+		}
+
+		#statistics td, th {
+			padding: 5px;
 		}
 
 	</style>

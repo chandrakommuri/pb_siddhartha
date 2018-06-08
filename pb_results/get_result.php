@@ -31,16 +31,30 @@
 									when 'P' then 'Practical' 
 									when 'PW' then 'Project Work' 
 									when 'C' then 'Extra Curricular' 
-									when 'PW' then 'Diversified' 
+									when 'D' then 'Diversified' 
 									else r.tp end) as type,
+								r.my as month_year,
 								(case 
 									when  c.ccode like 'ENG%' or c.ccode like 'HIN%' or c.ccode like 'TEL%' then '1' 
-									when  c.ccode not like 'ENG%' and c.ccode not like 'HIN%' and c.ccode not like 'TEL%' and c.ccode not like 'AEC%' and c.ccode not like 'AOC%' then '2'
+									when  c.ccode not like 'ENG%' and c.ccode not like 'HIN%' and c.ccode not like 'TEL%' and c.ccode not like 'AEC%' and c.ccode not like 'AOC%' and r.tp not like 'C' and r.tp not like 'D' then '2'
 									when  c.ccode like 'AEC%' or c.ccode like 'AOC%' then '3'
-									end) part,
+									when  r.tp like 'C' or r.tp like 'D' then '4'
+									end) as part,
 								r.ie1 as internal,
 								r.se1 as external,
 								(r.ie1 + r.se1) as total,
+								(case 
+									when  (c.ccode like 'AEC%' or c.ccode like 'AOC%' or r.tp like 'P') and r.ie1 >= 4 then 'P'
+									when  (c.ccode not like 'AEC%' and c.ccode not like 'AOC%' and r.tp like 'T') and r.ie1 >= 10 then 'P'
+									else 'F' end) as internal_pass,
+								(case 
+									when  (c.ccode like 'AEC%' or c.ccode like 'AOC%' or r.tp like 'P') and r.se1 >= 16 then 'P'
+									when  (c.ccode not like 'AEC%' and c.ccode not like 'AOC%' and r.tp like 'T') and r.se1 >= 30 then 'P'
+									else 'F' end) as external_pass,
+								(case 
+									when  (c.ccode like 'AEC%' or c.ccode like 'AOC%' or r.tp like 'P') and r.ie1 >= 4 and r.se1 >= 16 then 'P'
+									when  (c.ccode not like 'AEC%' and c.ccode not like 'AOC%' and r.tp like 'T') and r.ie1 >= 10 and r.se1 >= 30 then 'P'
+									else 'F' end) as pass,
 								(case r.tp when 'T' then ((r.ie1 + r.se1)/10) else ((r.ie1 + r.se1)/5) end) as grade_points,
 								c.credits as credits,
 								round((case r.tp when 'T' then ((r.ie1 + r.se1)/10) * c.credits else ((r.ie1 + r.se1)/5) * c.credits end), 2) as credit_points,
@@ -79,13 +93,20 @@
 					$course->course_code = $row['course_code'];
 					$course->title = $row['title'];
 					$course->type = $row['type'];
+					$course->month_year = $row['month_year'];
 					$course->part = $row['part'];
 					$course->internal = $row['internal'];
 					$course->external = $row['external'];
 					$course->total = $row['total'];
-					$course->grade_points = $row['grade_points'];
-					$course->credits = $row['credits'];
-					$course->credit_points = $row['credit_points'];
+					$course->internal_pass = $row['internal_pass'];
+					$course->external_pass = $row['external_pass'];
+					$course->pass = $row['pass'];
+					if($course->pass == 'P' || $course->part == '4')
+					{
+						$course->grade_points = $row['grade_points'];
+						$course->credits = $row['credits'];
+						$course->credit_points = $row['credit_points'];
+					}
 					$course->grade = $row['grade'];
 					
 					$semester->parts[$course->part]->courses[$course->course_code] = $course;
@@ -101,19 +122,50 @@
 						$course->external = $row['external'];
 					}
 					$course->total = $course->internal + $course->external;
-					if($course->type == 'Theory')
-					{
-						$course->grade_points = $course->total / 10;
-					}
-					else
-					{
-						$course->grade_points = $course->total / 5;
-					}
-					$course->credit_points = $course->grade_points * $course->credits;
-				}
-				
-			}
 
+					if($course->part == '3' || $course->type == 'Practical')
+					{
+						if($course->internal >= 4)
+						{
+							$course->internal_pass = 'P';
+						}
+						if($course->external >= 16)
+						{
+							$course->external_pass = 'P';
+						}
+					}
+					else if($course->part != '4')
+					{
+						if($course->internal >= 10)
+						{
+							$course->internal_pass = 'P';
+						}
+						if($course->external >= 30)
+						{
+							$course->external_pass = 'P';
+						}
+					}
+
+					if($course->internal_pass == 'P' && $course->external_pass == 'P')
+					{
+						$course->pass = 'P';
+					}
+
+					if($course->pass == 'P')
+					{
+						if($course->type == 'Theory')
+						{
+							$course->grade_points = $course->total / 10;
+						}
+						else
+						{
+							$course->grade_points = $course->total / 5;
+						}
+						$course->credits = $row['credits'];
+						$course->credit_points = $course->grade_points * $course->credits;
+					}
+				}
+			}
 			echo json_encode($result);
 		}
 		else
