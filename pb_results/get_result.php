@@ -55,16 +55,17 @@
 									when  (c.ccode like 'AEC%' or c.ccode like 'AOC%' or r.tp like 'P') and r.ie1 >= 4 and r.se1 >= 16 then 'P'
 									when  (c.ccode not like 'AEC%' and c.ccode not like 'AOC%' and r.tp like 'T') and r.ie1 >= 10 and r.se1 >= 30 then 'P'
 									else 'F' end) as pass,
-								(case r.tp when 'T' then ((r.ie1 + r.se1)/10) else ((r.ie1 + r.se1)/5) end) as grade_points,
-								c.credits as credits,
-								round((case r.tp when 'T' then ((r.ie1 + r.se1)/10) * c.credits else ((r.ie1 + r.se1)/5) * c.credits end), 2) as credit_points,
+								round((case r.tp when 'T' then ((r.ie1 + r.se1)/10) else ((r.ie1 + r.se1)/5) end), 2) as grade_points,
+								r.credits as credits,
+								round((case r.tp when 'T' then ((r.ie1 + r.se1)/10) * r.credits else ((r.ie1 + r.se1)/5) * r.credits end), 2) as credit_points,
 								r.grade as grade
 								from 
 									results r, 
 									codes c 
 								where 
 									r.rollno='$rollno' and 
-									r.ccode = c.ccode order by r.sem";
+									r.ccode = c.ccode 
+								order by r.sem, r.ord";
 
 			$results = mysql_query($results_query);
 			$result->semesters = array(); 
@@ -101,10 +102,10 @@
 					$course->internal_pass = $row['internal_pass'];
 					$course->external_pass = $row['external_pass'];
 					$course->pass = $row['pass'];
+					$course->credits = $row['credits'];
 					if($course->pass == 'P' || $course->part == '4')
 					{
 						$course->grade_points = $row['grade_points'];
-						$course->credits = $row['credits'];
 						$course->credit_points = $row['credit_points'];
 					}
 					$course->grade = $row['grade'];
@@ -121,8 +122,11 @@
 					{
 						$course->external = $row['external'];
 					}
+					if($course->credits < $row['credits'])
+					{
+						$course->credits = $row['credits'];
+					}
 					$course->total = $course->internal + $course->external;
-
 					if($course->part == '3' || $course->type == 'Practical')
 					{
 						if($course->internal >= 4)
@@ -161,7 +165,6 @@
 						{
 							$course->grade_points = $course->total / 5;
 						}
-						$course->credits = $row['credits'];
 						$course->credit_points = $course->grade_points * $course->credits;
 					}
 				}

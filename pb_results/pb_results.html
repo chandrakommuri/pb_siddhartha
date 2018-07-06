@@ -6,6 +6,12 @@
 	<script type="text/javascript" src="../js/jquery.min.js"></script>
 	<script type="text/javascript">
 		$(document).ready(function(){
+			$('#q_rollno').on("keyup", function(event) {
+				event.preventDefault();
+				if (event.keyCode === 13) {
+					$('#get-result').click();
+				}
+			});
 			$('#get-result').click(function() {
 				$('#result').fadeOut("slow");
 				var rollno = $('#q_rollno').val();
@@ -26,6 +32,7 @@
 						$('#parent_gaurdian').text(result.parent_gaurdian);
 						$('#second_language').text(result.second_language);
 						var $semesters = $('#semesters').html('');
+						var $statistics = $('#statistics').html('');
 						$.each(result.semesters, function(si, semester) {
 							var $div = $('<div/>');
 							var $table = $('<table/>').attr('id', 'semester' + semester.number).attr('border','1').attr('bordercolor','#cdcdcd');
@@ -67,8 +74,7 @@
 									$tr.append($('<td/>').append(course.type).addClass('center'));
 									$tr.append($('<td/>').append(course.month_year).addClass('center'));
 									if(course.type == 'Diversified' || course.type == 'Extra Curricular') {
-										$tr.append($('<td/>').attr('colspan','5').append('-').addClass('center'));
-										$tr.append($('<td/>').append(course.grade).addClass('center'));
+										$tr.append($('<td/>').attr('colspan','5').append('Grade: ').append(course.grade).addClass('center'));
 										$tr.append($('<td/>').append(course.credits).addClass('center'));
 										$tr.append($('<td/>').append('-').addClass('center'));
 									}
@@ -90,11 +96,9 @@
 										}
 										$tr.append($pass);
 										$tr.append($('<td/>').append(course.grade_points).addClass('center'));
-										$tr.append($('<td/>').append(course.credits).addClass('center'));
-										var $credit_points = $('<td/>').append(course.credit_points).addClass('center');
-										if(course.pass == 'P') {
-											$credit_points.addClass('part'+course.part+'_credit_points');
-										}
+										var $credits = $('<td/>').append(course.credits).addClass('center').addClass('part'+course.part+'_credits');
+										var $credit_points = $('<td/>').append(course.credit_points).addClass('center').addClass('part'+course.part+'_credit_points');
+										$tr.append($credits);
 										$tr.append($credit_points);
 									}
 									$table.append($tr);
@@ -120,40 +124,57 @@
 						if(result.semesters.length % 2 != 0) {
 							$semesters.append($('<div/>').addClass('clear'));
 						}
-
+						
+						var total1 = 0;
+						$('.part1_credits').each(function(index, td){
+							total1 += parseInt($(td).text());
+						});
 						var $part1_credit_points = $('.part1_credit_points');
-						var count1 = $part1_credit_points.length;
 						var sum1 = 0;
 						$part1_credit_points.each(function(index, td){
 							sum1 += parseFloat($(td).text());
 						});
-						var average1 = (sum1/count1).toFixed(2);
+						var average1 = (sum1/$part1_credit_points.length).toFixed(2);
+						var cgpa1 = (sum1/total1).toFixed(2);
 
+						var total2 = 0;
+						$('.part2_credits').each(function(index, td){
+							total2 += parseInt($(td).text());
+						});
 						var $part2_credit_points = $('.part2_credit_points');
-						var count2 = $part2_credit_points.length;
 						var sum2 = 0;
 						$part2_credit_points.each(function(index, td){
 							sum2 += parseFloat($(td).text());
 						});
-						var average2 = (sum2/count2).toFixed(2);
-
+						var average2 = (sum2/$part2_credit_points.length).toFixed(2);
+						var cgpa2 = (sum2/total2).toFixed(2);
+						
+						var total3 = 0;
+						$('.part3_credits').each(function(index, td){
+							total3 += parseInt($(td).text());
+						});
 						var $part3_credit_points = $('.part3_credit_points');
-						var count3 = $part3_credit_points.length;
 						var sum3 = 0;
 						$part3_credit_points.each(function(index, td){
 							sum3 += parseFloat($(td).text());
 						});
-						var average3 = (sum3/count3).toFixed(2);
+						var average3 = (sum3/$part3_credit_points.length).toFixed(2);
+						var cgpa3 = (sum3/total3).toFixed(2);
 						
 						var $credit_table = $('<table />').attr('border', '1').attr('bordercolor','#cdcdcd');;
-						var $thr = $('<tr />').append($('<th />').attr('rowspan',2).text('Average credit points'))
+						var $thr = $('<tr />').append($('<th />'))
 											.append($('<th />').text('Part - 1'))
 											.append($('<th />').text('Part - 2'))
 											.append($('<th />').text('Part - 3'));
-						var $tr = $('<tr />').append($('<td />').text(average1))
+						var $tr1 = $('<tr />').append($('<th />').text('Average credit points'))
+											.append($('<td />').text(average1))
 											.append($('<td />').text(average2))
 											.append($('<td />').text(average3));
-						$credit_table.append($thr).append($tr);
+						var $tr2 = $('<tr />').append($('<th />').text('CGPA'))
+											.append($('<td />').text(cgpa1))
+											.append($('<td />').text(cgpa2))
+											.append($('<td />').text(cgpa3));
+						$credit_table.append($thr).append($tr2);
 						
 						var $status = $('<h2 />').append('Overall Status: ');
 						if($('#result').find('.fail').length > 0) {
@@ -162,7 +183,7 @@
 							$status.append('PASS');
 						}
 
-						$('#statistics').html($credit_table.append($thr).append($tr)).append($status);
+						$('#statistics').append($credit_table).append($status);
 						$('#result').fadeIn("slow");
 					},
 				"json");
@@ -197,14 +218,14 @@
 		}
 
 		.form_input {
-			padding: 3px 5px;
+			padding: 5px 8px;
 			border: 1px solid #cdcdcd;
 			border-radius: 5px;
 		}
 
 		.button {
 			background-color: #279DE3;
-			padding: 5px 15px;
+			padding: 5px 12px;
 			color: #FFFFFF !important;
 			border: 0;
 			margin: 0;
@@ -212,6 +233,11 @@
 			font-size: 11px;
 			text-decoration: none;
 			border-radius: 5px;
+		}
+		
+		.button:hover {
+			padding: 8px 13px;
+			cursor: pointer;
 		}
 
 		.wrap {
@@ -248,7 +274,7 @@
 		}
 
 		#query-form td {
-			padding: 5px;
+			padding: 8px;
 		}
 
 		#result {
@@ -329,7 +355,7 @@
 			<table>
 				<tr>
 					<th><label for"q_rollno" class="form_label">Roll Number:</label></th>
-					<td><input type="number" name="rollno" id="q_rollno" class="form_input"></td>
+					<td><input type="text" name="rollno" id="q_rollno" class="form_input"></td>
 					<td><button id="get-result" class="button">Get Result</button></td>
 				</tr>
 			</table>
