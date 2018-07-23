@@ -33,6 +33,11 @@
 						$('#second_language').text(result.second_language);
 						var $semesters = $('#semesters').html('');
 						var $statistics = $('#statistics').html('');
+						if($.isEmptyObject(result.semesters)) {
+							var $semesters = $('#semesters').html('<h3 style="padding:5px;text-align:center;">No records found!</h3>');
+							$('#result').fadeIn("slow");
+							return;
+						}
 						$.each(result.semesters, function(si, semester) {
 							var $div = $('<div/>');
 							var $table = $('<table/>').attr('id', 'semester' + semester.number).attr('border','1').attr('bordercolor','#cdcdcd');

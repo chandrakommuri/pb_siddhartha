@@ -44,16 +44,16 @@
 								r.se1 as external,
 								(r.ie1 + r.se1) as total,
 								(case 
-									when  (c.ccode like 'AEC%' or c.ccode like 'AOC%' or r.tp like 'P') and r.ie1 >= 4 then 'P'
-									when  (c.ccode not like 'AEC%' and c.ccode not like 'AOC%' and r.tp like 'T') and r.ie1 >= 10 then 'P'
+									when  (c.ccode like 'AEC%' or c.ccode like 'AOC%' or c.ccode like 'FRE%' or r.tp like 'P') and r.ie1 >= 4 then 'P'
+									when  (c.ccode not like 'AEC%' and c.ccode not like 'AOC%' and c.ccode not like 'FRE%' and r.tp like 'T') and r.ie1 >= 10 then 'P'
 									else 'F' end) as internal_pass,
 								(case 
-									when  (c.ccode like 'AEC%' or c.ccode like 'AOC%' or r.tp like 'P') and r.se1 >= 16 then 'P'
-									when  (c.ccode not like 'AEC%' and c.ccode not like 'AOC%' and r.tp like 'T') and r.se1 >= 30 then 'P'
+									when  (c.ccode like 'AEC%' or c.ccode like 'AOC%' or c.ccode like 'FRE%' or r.tp like 'P') and r.se1 >= 16 then 'P'
+									when  (c.ccode not like 'AEC%' and c.ccode not like 'AOC%' and c.ccode not like 'FRE%' and r.tp like 'T') and r.se1 >= 30 then 'P'
 									else 'F' end) as external_pass,
 								(case 
-									when  (c.ccode like 'AEC%' or c.ccode like 'AOC%' or r.tp like 'P') and r.ie1 >= 4 and r.se1 >= 16 then 'P'
-									when  (c.ccode not like 'AEC%' and c.ccode not like 'AOC%' and r.tp like 'T') and r.ie1 >= 10 and r.se1 >= 30 then 'P'
+									when  (c.ccode like 'AEC%' or c.ccode like 'AOC%' or c.ccode like 'FRE%' or r.tp like 'P') and r.ie1 >= 4 and r.se1 >= 16 then 'P'
+									when  (c.ccode not like 'AEC%' and c.ccode not like 'AOC%' and c.ccode not like 'FRE%' and r.tp like 'T') and r.ie1 >= 10 and r.se1 >= 30 then 'P'
 									else 'F' end) as pass,
 								round((case r.tp when 'T' then ((r.ie1 + r.se1)/10) else ((r.ie1 + r.se1)/5) end), 2) as grade_points,
 								r.credits as credits,
