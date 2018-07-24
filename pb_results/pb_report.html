@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>P.B.Siddhartha Results Portal</title>
+	<link rel="icon" type="image/png" href="../images/buddha.png" />
+	<script type="text/javascript" src="../js/jquery.min.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function(){
+			$.get('get_sections.php', function( sections ) {
+				var $q_section = $('#q_section').html('');
+				$q_section.append($('<option />').text('--Select--'));
+				$.each(sections, function(index, section) {
+					$q_section.append($('<option />').text(section).val(section));
+				});
+			},
+			"json");
+			$('#q_section').change(function() {
+				var section = $(this).val();
+				$.get('get_batches.php', {section:section}, function( batches ) {
+					var $q_batch = $('#q_batch').html('');
+					$q_batch.append($('<option />').text('--Select--'));
+					$.each(batches, function(index, batch) {
+						$q_batch.append($('<option />').text(batch).val(batch));
+					});
+				},
+				"json");
+			});
+			
+			$('#q_section', '#q_batch').on("keyup", function(event) {
+				event.preventDefault();
+				if (event.keyCode === 13) {
+					$('#get-report').click();
+				}
+			});
+			$('#get-report').click(function() {
+				$('#report').fadeOut("slow");
+				var section = $('#q_section').val();
+				var batch = $('#q_batch').val();
+				$('tr.error').remove();
+				if(!section || !batch) {
+					$(this).closest('table').append($('<tr />').append($('<td />').attr('colspan', 2).text('Please select all fields.').addClass('center')).addClass('error'));
+					return;
+				}
+
+				$.get('get_report.php', {section:section, batch:batch}, function( failures ) {
+					$('#section').text(section);
+					$('#batch').text(batch);
+					var $failures = $('#failures').html('');
+					if($.isEmptyObject(failures)) {
+						$failures.html('<h3 style="padding:5px;text-align:center;">No records found!</h3>');
+						$('#report').fadeIn("slow");
+						return;
+					}
+					
+					var $div = $('<div/>');
+					
+					var $table = $('<table/>').attr('border','1').attr('bordercolor','#cdcdcd');
+					var $ttr = $('<tr/>');
+					$ttr.append($('<th/>').append('Roll Number').addClass('center'));
+					$ttr.append($('<th/>').append('Semester').addClass('center'));
+					$ttr.append($('<th/>').append('Course Code').addClass('center'));
+					$ttr.append($('<th/>').append('Title').addClass('center'));
+					$ttr.append($('<th/>').append('Type').addClass('center'));
+					$ttr.append($('<th/>').append('Internal').addClass('center'));
+					$ttr.append($('<th/>').append('External').addClass('center'));
+					$ttr.append($('<th/>').append('Total').addClass('center'));
+
+					$div.append($table.append($ttr));
+					
+					$.each(failures, function(rollno, courses) {
+						var add = true;
+						var rowspan = 0;
+						var $td_rno = $('<td/>').append(rollno).addClass('center').addClass('s' + rollno);
+						$.each(courses, function(course_code, course) {
+							rowspan++;
+							var $tr = $('<tr/>');
+							if(add) {
+								$tr.append($td_rno);
+								add = false;
+							}
+							$tr.append($('<td/>').append(course.semester).addClass('center'));
+							$tr.append($('<td/>').append(course.course_code).addClass('center'));
+							$tr.append($('<td/>').append(course.title).addClass('wrap'));
+							$tr.append($('<td/>').append(course.type).addClass('center'));
+							var $internal = $('<td/>').append(course.internal).addClass('center');
+							if(course.internal_pass == 'F') {
+								$internal.addClass('fail');
+							}
+							$tr.append($internal);
+							var $external = $('<td/>').append(course.external).addClass('center');
+							if(course.external_pass == 'F') {
+								$external.addClass('fail');
+							}
+							$tr.append($external);
+							$tr.append($('<td/>').append(course.total).addClass('center'));
+							$table.append($tr);
+						});
+						$($td_rno).attr('rowspan',rowspan);
+					});
+					$('#failures').append($div);
+					$('#report').fadeIn("slow");
+				},
+				"json");
+			});
+		});
+	</script>
+	<style>
+		* {
+			margin: 0px;
+			padding: 0px;
+		}
+
+		.center {
+			text-align: center;
+		}
+
+		.error {
+			color: #ff0000;	
+		}
+
+		.fail {
+			color: #ff0000;	
+			font-weight: bold;
+		}
+
+		.form_label {
+			font-size: 15px;
+		}
+
+		.stat_label {
+			font-size: 13px;
+		}
+
+		.form_input {
+			padding: 5px 8px;
+			border: 1px solid #cdcdcd;
+			border-radius: 5px;
+			width: 120px;
+		}
+
+		.button {
+			background-color: #279DE3;
+			padding: 8px 12px;
+			color: #FFFFFF !important;
+			border: 0;
+			margin: 0;
+			font-weight: bold;
+			font-size: 11px;
+			text-decoration: none;
+			border-radius: 5px;
+		}
+		
+		.button:hover {
+			padding: 8px 13px;
+			cursor: pointer;
+		}
+
+		.wrap {
+			overflow-wrap: break-word;
+			word-wrap: break-word;
+
+			-ms-word-break: break-all;
+			word-break: break-word;
+
+			-ms-hyphens: auto;
+			-moz-hyphens: auto;
+			-webkit-hyphens: auto;
+			hyphens: auto;
+		}
+
+		div.left {
+			float: left;
+		}
+
+		div.right {
+			float: right;
+		}
+
+		div.clear {
+			clear: both;
+		}
+
+		#wrapper {
+			font: 12px arial, sans-serif;
+		}
+
+		#query-form table {
+			margin: 10px auto;
+		}
+
+		#query-form th {
+			text-align: right;
+			padding: 5px;
+		}
+		
+		#query-form td {
+			padding: 5px;
+		}
+
+		#report {
+			margin: 0px auto;
+			width: 1016px;
+			display: none;
+		}
+
+		#banner {
+			background: #cdcdcd url('../images/pb_logo.png') no-repeat;
+			background-size: 130px 150px;
+			background-position: 3% 50%;
+			margin: 0px auto;
+			height: 150px;
+			padding: 10px;
+		}
+	
+		#collage {
+			margin-top: 50px;
+			margin-left: 75px;
+			text-align: center;
+		}
+
+		#collage h1 {
+			margin-bottom: 10px;
+		}
+
+		#content label {
+			font-weight: bold;
+			text-transform: capitalize;
+		}
+
+		#basic-info {
+			padding: 10px;
+			border: 1px solid #cdcdcd;
+		}
+
+		#failures {
+			padding: 5px 5px;
+			border: 1px solid #cdcdcd;
+			border-top: none;
+		}
+
+		#failures table {
+			width: 1000px;
+			border-color:#cdcdcd;
+			border-collapse: collapse;
+			margin: 0px auto;
+		}
+
+		#failures th {
+			padding: 10px;
+			background: #aaa;
+		}
+		
+		#failures td {
+			padding: 5px;
+		}
+
+	</style>
+</head>
+<body>
+	<div id="wrapper">
+		<div id="query-form">
+			<table>
+				<tr>
+					<th><label for"q_section" class="form_label">Section:</label></th>
+					<td><select name="section" id="q_section" class="form_input"></select></td>
+				</tr>
+				<tr>
+					<th><label for"q_batch" class="form_label">Batch:</label></th>
+					<td><select type="text" name="batch" id="q_batch" class="form_input"></select></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td><button id="get-report" class="button">Get Report</button></td>
+				</tr>
+			</table>
+		</div>
+		<div id="report">
+			<div id="banner">
+				<div id="collage">
+					<h1>P.B.Siddhartha College of Arts & Science, Vijayawada - 520010.</h1>
+					<h2>An Autonomous College in the jurisdiction of Krishna University</h2>
+				</div>
+			</div>
+			<div id="content">
+				<div id="basic-info">
+					<h2 class="center"><label>Students' Report</label></h2>
+					<div class="left">
+						<label>Section: </label><span id="section"></span>
+					</div>
+					<div class="right">
+						<label>Batch: </label><span id="batch"></span>
+					</div>
+					<div class="clear"></div>
+				</div>
+				<div id="failures"></div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

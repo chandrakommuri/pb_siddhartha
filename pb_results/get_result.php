@@ -127,7 +127,7 @@
 						$course->credits = $row['credits'];
 					}
 					$course->total = $course->internal + $course->external;
-					if($course->part == '3' || $course->type == 'Practical')
+					if($course->part == '3' || $course->type == 'Practical' || substr($course->course_code,0,3) == 'FRE')
 					{
 						if($course->internal >= 4)
 						{
@@ -166,6 +166,7 @@
 							$course->grade_points = $course->total / 5;
 						}
 						$course->credit_points = $course->grade_points * $course->credits;
+						$course->month_year = $row['month_year'];
 					}
 				}
 			}
