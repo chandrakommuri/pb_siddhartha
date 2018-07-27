@@ -189,7 +189,12 @@
 					}
 
 					$('#statistics').append($credit_table).append($status);
-					$('#result').fadeIn("slow");
+					var $print = $('<center/>').append($('<button/>').attr('id','print').append('Print').addClass('button'));
+					$print.click(function() {
+						window.print();
+					});
+					var $print_div = $('<div/>').attr('id','printer').append($print).css({"margin":"10px auto"});
+					$('#result').append($print_div).fadeIn("slow");
 					},
 				"json");
 			});
@@ -199,6 +204,27 @@
 		* {
 			margin: 0px;
 			padding: 0px;
+		}
+
+		@media print {
+			body * {
+				visibility: hidden;
+			}
+
+			#result * {
+				visibility: visible;
+			}
+
+			#banner {
+				background: #cdcdcd url('../images/pb_logo.png') no-repeat !important;
+				background-size: 130px 150px !important;
+				background-position: 3% 50% !important;
+				-webkit-print-color-adjust: exact;
+			}
+
+			#printer * {
+				visibility: hidden;
+			}
 		}
 
 		.center {
@@ -230,7 +256,7 @@
 
 		.button {
 			background-color: #279DE3;
-			padding: 5px 12px;
+			padding: 8px 12px;
 			color: #FFFFFF !important;
 			border: 0;
 			margin: 0;

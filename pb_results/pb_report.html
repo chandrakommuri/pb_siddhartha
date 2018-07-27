@@ -8,7 +8,7 @@
 		$(document).ready(function(){
 			$.get('get_sections.php', function( sections ) {
 				var $q_section = $('#q_section').html('');
-				$q_section.append($('<option />').text('--Select--'));
+				$q_section.append($('<option />').text('--Select Section--'));
 				$.each(sections, function(index, section) {
 					$q_section.append($('<option />').text(section).val(section));
 				});
@@ -18,7 +18,7 @@
 				var section = $(this).val();
 				$.get('get_batches.php', {section:section}, function( batches ) {
 					var $q_batch = $('#q_batch').html('');
-					$q_batch.append($('<option />').text('--Select--'));
+					$q_batch.append($('<option />').text('--Select Batch--'));
 					$.each(batches, function(index, batch) {
 						$q_batch.append($('<option />').text(batch).val(batch));
 					});
@@ -97,8 +97,14 @@
 						});
 						$($td_rno).attr('rowspan',rowspan);
 					});
+
 					$('#failures').append($div);
-					$('#report').fadeIn("slow");
+					var $print = $('<center/>').append($('<button/>').attr('id','print').append('Print').addClass('button'));
+					$print.click(function() {
+						window.print();
+					});
+					var $print_div = $('<div/>').attr('id','printer').append($print).css({"margin":"10px auto"});
+					$('#report').append($print_div).fadeIn("slow");
 				},
 				"json");
 			});
@@ -108,6 +114,27 @@
 		* {
 			margin: 0px;
 			padding: 0px;
+		}
+
+		@media print {
+			body * {
+				visibility: hidden;
+			}
+
+			#report * {
+				visibility: visible;
+			}
+
+			#banner {
+				background: #cdcdcd url('../images/pb_logo.png') no-repeat !important;
+				background-size: 130px 150px !important;
+				background-position: 3% 50% !important;
+				-webkit-print-color-adjust: exact;
+			}
+
+			#printer * {
+				visibility: hidden;
+			}
 		}
 
 		.center {
@@ -189,7 +216,7 @@
 		}
 
 		#query-form th {
-			text-align: right;
+			text-align: left;
 			padding: 5px;
 		}
 		
@@ -204,9 +231,9 @@
 		}
 
 		#banner {
-			background: #cdcdcd url('../images/pb_logo.png') no-repeat;
-			background-size: 130px 150px;
-			background-position: 3% 50%;
+			background: #cdcdcd url('../images/pb_logo.png') no-repeat !important;
+			background-size: 130px 150px !important;
+			background-position: 3% 50% !important;
 			margin: 0px auto;
 			height: 150px;
 			padding: 10px;
@@ -260,16 +287,13 @@
 	<div id="wrapper">
 		<div id="query-form">
 			<table>
-				<tr>
+				<!-- <tr>
 					<th><label for"q_section" class="form_label">Section:</label></th>
-					<td><select name="section" id="q_section" class="form_input"></select></td>
-				</tr>
-				<tr>
 					<th><label for"q_batch" class="form_label">Batch:</label></th>
-					<td><select type="text" name="batch" id="q_batch" class="form_input"></select></td>
-				</tr>
+				</tr> -->
 				<tr>
-					<td></td>
+					<td><select name="section" id="q_section" class="form_input"></select></td>
+					<td><select type="text" name="batch" id="q_batch" class="form_input"></select></td>
 					<td><button id="get-report" class="button">Get Report</button></td>
 				</tr>
 			</table>
