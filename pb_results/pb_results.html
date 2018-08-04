@@ -189,14 +189,12 @@
 					}
 
 					$('#statistics').append($credit_table).append($status);
-					var $print = $('<center/>').append($('<button/>').attr('id','print').append('Print').addClass('button'));
-					$print.click(function() {
-						window.print();
-					});
-					var $print_div = $('<div/>').attr('id','printer').append($print).css({"margin":"10px auto"});
-					$('#result').append($print_div).fadeIn("slow");
+					$('#result').fadeIn("slow");
 					},
 				"json");
+			});
+			$('#print').click(function() {
+				window.print();
 			});
 		});
 	</script>
@@ -377,7 +375,10 @@
 		#statistics td, th {
 			padding: 5px;
 		}
-
+		
+		#printer {
+			margin: 10px auto;
+		}
 	</style>
 </head>
 <body>
@@ -416,6 +417,11 @@
 				</div>
 				<div id="semesters"></div>
 				<div id="statistics"></div>
+			</div>
+			<div id="printer">
+				<center>
+					<button id="print" class="button">Print</button>
+				</center>
 			</div>
 		</div>
 	</div>

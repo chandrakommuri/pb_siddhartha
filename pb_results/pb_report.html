@@ -99,14 +99,12 @@
 					});
 
 					$('#failures').append($div);
-					var $print = $('<center/>').append($('<button/>').attr('id','print').append('Print').addClass('button'));
-					$print.click(function() {
-						window.print();
-					});
-					var $print_div = $('<div/>').attr('id','printer').append($print).css({"margin":"10px auto"});
-					$('#report').append($print_div).fadeIn("slow");
+					$('#report').fadeIn("slow");
 				},
 				"json");
+			});
+			$('#print').click(function() {
+				window.print();
 			});
 		});
 	</script>
@@ -280,7 +278,10 @@
 		#failures td {
 			padding: 5px;
 		}
-
+		
+		#printer {
+			margin: 10px auto;
+		}
 	</style>
 </head>
 <body>
@@ -317,6 +318,11 @@
 					<div class="clear"></div>
 				</div>
 				<div id="failures"></div>
+			</div>
+			<div id="printer">
+				<center>
+					<button id="print" class="button">Print</button>
+				</center>
 			</div>
 		</div>
 	</div>
