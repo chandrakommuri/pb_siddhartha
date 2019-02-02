@@ -8,7 +8,9 @@
         public $month_year;
         public $part;
         public $internal = 0;
+        public $internal_abs;
         public $external = 0;
+        public $external_abs;
         public $total = 0;
         public $grade_points = 0;
         public $credits = 0;

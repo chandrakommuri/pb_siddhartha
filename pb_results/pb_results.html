@@ -84,13 +84,21 @@
 									$tr.append($('<td/>').append('-').addClass('center'));
 								}
 								else {
-									var $internal = $('<td/>').append(course.internal).addClass('center');
-									if(course.internal_pass == 'F') {
+									if(course.internal_abs == 'A') {
+										var $internal = $('<td/>').append(course.internal_abs).addClass('center');
+									} else {
+										var $internal = $('<td/>').append(course.internal).addClass('center');
+									}
+									if(course.internal_pass == 'F' || course.internal_abs == 'A') {
 										$internal.addClass('fail');
 									}
 									$tr.append($internal);
-									var $external = $('<td/>').append(course.external).addClass('center');
-									if(course.external_pass == 'F') {
+									if(course.external_abs == 'A') {
+										var $external = $('<td/>').append(course.external_abs).addClass('center');
+									} else {
+										var $external = $('<td/>').append(course.external).addClass('center');
+									}
+									if(course.external_pass == 'F' || course.external_abs == 'A') {
 										$external.addClass('fail');
 									}
 									$tr.append($external);
@@ -205,6 +213,9 @@
 		}
 
 		@media print {
+			@page {
+				size: landscape;
+			}
 			body * {
 				visibility: hidden;
 			}

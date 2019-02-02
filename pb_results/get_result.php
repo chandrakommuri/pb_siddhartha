@@ -10,7 +10,7 @@
 
 		$result = new Result();
 
-		$info_query = "select n.rollno rollno, n.name name, n.sect section, n.fname parent_gaurdian, n.sec_lan second_language from names n where rollno = '$rollno'";
+		$info_query = "select n.rollno rollno, n.name name, n.sect section, n.fname parent_gaurdian, n.sec_lan second_language from names n where rollno like '$rollno'";
 		$info_result = mysql_query($info_query);
 		if(mysql_num_rows($info_result))
 		{
@@ -41,7 +41,9 @@
 									when  r.tp like 'C' or r.tp like 'D' then '4'
 									end) as part,
 								r.ie1 as internal,
+								r.ie1_abs as internal_abs,
 								r.se1 as external,
+								r.se1_abs as external_abs,
 								(r.ie1 + r.se1) as total,
 								(case 
 									when  (c.ccode like 'AEC%' or c.ccode like 'AOC%' or c.ccode like 'FRE%' or c.ccode like 'SEC%' or r.tp like 'P' or r.tp like 'PW') and r.ie1 >= 4 then 'P'
@@ -63,7 +65,7 @@
 									results r, 
 									codes c 
 								where 
-									r.rollno='$rollno' and 
+									r.rollno like '$rollno' and 
 									r.ccode = c.ccode 
 								order by r.sem, r.ord";
 
@@ -97,7 +99,9 @@
 					$course->month_year = $row['month_year'];
 					$course->part = $row['part'];
 					$course->internal = $row['internal'];
+					$course->internal_abs = $row['internal_abs'];
 					$course->external = $row['external'];
+					$course->external_abs = $row['external_abs'];
 					$course->total = $row['total'];
 					$course->internal_pass = $row['internal_pass'];
 					$course->external_pass = $row['external_pass'];
@@ -116,10 +120,12 @@
 				{
 					if($course->internal < $row['internal'])
 					{
+						$course->internal_abs = $row['internal_abs'];
 						$course->internal = $row['internal'];
 					}
 					if($course->external < $row['external'])
 					{
+						$course->external_abs = $row['external_abs'];
 						$course->external = $row['external'];
 					}
 					if($course->credits < $row['credits'])
